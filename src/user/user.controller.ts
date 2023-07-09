@@ -26,7 +26,7 @@ export class UserController {
 	@Get("profile")
 	@Auth()
 	async getProfile(@CurrentUser("id") id: number) {
-		return this.userService.byId(id)
+		return this.userService.byParam('id', id)
 	}
 
 	@UsePipes(new ValidationPipe())
@@ -48,6 +48,4 @@ export class UserController {
 	) {
 		return this.userService.toggleFavorite({userId: Number(userId), productId: Number(productId)})
 	}
-
-
 }

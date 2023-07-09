@@ -10,9 +10,10 @@ export class UserService {
 	constructor(private prisma: PrismaService) {
 	}
 
-	async byId(id: number, selectObject?: Prisma.UserSelect) {
+	async byParam(param: keyof Prisma.UserWhereUniqueInput, value: any, selectObject?: Prisma.UserSelect) {
+		console.log({param, value})
 		const user = await this.prisma.user.findUnique({
-			where: { id },
+			where: { [param]: value },
 			select: {
 				...returnUserObject,
 				favorites: {
@@ -29,32 +30,7 @@ export class UserService {
 		})
 
 		if (!user) {
-			throw new Error("User not found")
-		}
-
-		return user
-	}
-
-	async byEmail(email: string, selectObject?: Prisma.UserSelect) {
-		const user = await this.prisma.user.findUnique({
-			where: { email },
-			select: {
-				...returnUserObject,
-				favorites: {
-					select: {
-						id: true,
-						name: true,
-						price: true,
-						images: true,
-						slug: true,
-					},
-				},
-				...selectObject,
-			},
-		})
-
-		if (!user) {
-			throw new Error("User not found")
+			throw new NotFoundException("User not found")
 		}
 
 		return user
@@ -62,7 +38,7 @@ export class UserService {
 
 
 	async updateProfile({id, dto}:{id: number, dto: UserDto}) {
-		const user = await this.byId(id)
+		const user = await this.byParam('id', id)
 
 		if (user && id !== user.id) {
 			throw new BadRequestException("Email already in use")
@@ -82,7 +58,7 @@ export class UserService {
 	}
 
 	async toggleFavorite({userId, productId}:{userId: number, productId: number}) {
-		const user = await this.byId(userId)
+		const user = await this.byParam('id', userId)
 
 		if (!user) {
 			throw new NotFoundException("User not found")
